@@ -50,7 +50,7 @@ func main() {
 			},
 		})
 
-		appl.MoveToNextStep(2, "IN_PROGRESS")
+		appl.MoveToNextStep(2, "INTERVIEW", "Recruiter")
 
 		render.JSON(w, req, application_core_dto.ApplicationBasicDTO{
 			BaseRecord: core_shared.BaseDTO{

@@ -9,20 +9,22 @@ import (
 
 type ApplicationLogEntity struct {
 	core_shared.BaseEntity
-	applicationId string
-	jobId         string
-	stepSequence  int
-	stepStatus    string
-	completedDate time.Time
+	applicationId             string
+	jobId                     string
+	hiringStepType            string
+	hiringSteptypeCompletedAt time.Time
+	stepSequence              int
+	stepStatus                string
 }
 
 func NewApplicationLogEntity(applLogDTO application_core_dto.ApplicationLogBasicDTO) ApplicationLogEntity {
 	applLog := ApplicationLogEntity{
-		applicationId: applLogDTO.ApplicationId,
-		jobId:         applLogDTO.JobId,
-		stepSequence:  applLogDTO.StepSequence,
-		stepStatus:    applLogDTO.StepStatus,
-		completedDate: applLogDTO.CompletedDate,
+		applicationId:             applLogDTO.ApplicationId,
+		jobId:                     applLogDTO.JobId,
+		hiringStepType:            applLogDTO.HiringStepType,
+		hiringSteptypeCompletedAt: applLogDTO.HiringSteptypeCompletedAt,
+		stepSequence:              applLogDTO.StepSequence,
+		stepStatus:                applLogDTO.StepStatus,
 	}
 
 	applLog.Base(core_shared.BaseDTO{
@@ -42,16 +44,20 @@ func (applLog *ApplicationLogEntity) JobId() string {
 	return applLog.jobId
 }
 
+func (applLog *ApplicationLogEntity) HiringStepType() string {
+	return applLog.hiringStepType
+}
+
+func (applLog *ApplicationLogEntity) HiringSteptypeCompletedAt() time.Time {
+	return applLog.hiringSteptypeCompletedAt
+}
+
 func (applLog *ApplicationLogEntity) StepSequence() int {
 	return applLog.stepSequence
 }
 
 func (applLog *ApplicationLogEntity) StepStatus() string {
 	return applLog.stepStatus
-}
-
-func (applLog *ApplicationLogEntity) CompletedDate() time.Time {
-	return applLog.completedDate
 }
 
 func (applLog *ApplicationLogEntity) Id() string {

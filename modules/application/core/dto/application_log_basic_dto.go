@@ -7,10 +7,11 @@ import (
 )
 
 type ApplicationLogBasicDTO struct {
-	BaseRecord    core_shared.BaseDTO `json:"baseRecord"`
-	ApplicationId string              `json:"applicationId"`
-	JobId         string              `json:"jobId"`
-	StepSequence  int                 `json:"stepSequence"`
-	StepStatus    string              `json:"stepStatus"`
-	CompletedDate time.Time           `json:"completedDate"`
+	BaseRecord                core_shared.BaseDTO `json:"baseRecord"`
+	ApplicationId             string              `json:"applicationId"`
+	JobId                     string              `json:"jobId"`
+	HiringStepType            string              `json:"hiringStepType"`
+	HiringSteptypeCompletedAt time.Time           `json:"hiringStepTypeCompletedAt"`
+	StepSequence              int                 `json:"stepSequence"`
+	StepStatus                string              `json:"stepStatus"`
 }

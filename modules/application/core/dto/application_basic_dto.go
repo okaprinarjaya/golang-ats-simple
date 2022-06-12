@@ -11,6 +11,11 @@ type ApplicationBasicDTO struct {
 	ApplicantId         string                          `json:"applicantId"`
 	JobId               string                          `json:"jobId"`
 	CurrentStepSequence int                             `json:"currentStepSequence"`
+	IsRejected          bool                            `json:"isRejected"`
+	IsOffered           bool                            `json:"isOffered"`
+	IsHired             bool                            `json:"isHired"`
+	IsWithdrawed        bool                            `json:"isWithdrawed"`
+	IsCancelled         bool                            `json:"isCancelled"`
 	Applicant           application_core_vo.ApplicantVO `json:"applicantDetail"`
 	Job                 application_core_vo.JobVO       `json:"jobDetail"`
 }

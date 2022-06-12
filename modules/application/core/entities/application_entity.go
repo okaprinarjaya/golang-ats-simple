@@ -4,20 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	constants "gitlab.com/okaprinarjaya.wartek/ats-simple/modules"
 	application_core_dto "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/application/core/dto"
 	application_core_vo "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/application/core/value-objects"
 	core_shared "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/core-shared"
-)
-
-const (
-	APPL_STEP_STATUS_IN_PROGRESS = "IN_PROGRESS"
-	APPL_STEP_STATUS_IN_REVIEW   = "IN_REVIEW"
-	APPL_STEP_STATUS_PASSED      = "PASSED"
-	APPL_STEP_STATUS_REJECTED    = "REJECTED"
-	APPL_STEP_STATUS_WITHDRAW    = "WITHDRAW"
-	APPL_STEP_STATUS_OFFERED     = "OFFERED"
-	APPL_STEP_STATUS_CANCELLED   = "CANCELLED"
-	APPL_STEP_STATUS_HIRED       = "HIRED"
 )
 
 type ApplicationEntity struct {
@@ -26,15 +16,24 @@ type ApplicationEntity struct {
 	applicantId         string
 	jobId               string
 	currentStepSequence int
+	isRejected          bool
+	isOffered           bool
+	isHired             bool
+	isWithdrawed        bool
+	isCancelled         bool
 	applicant           application_core_vo.ApplicantVO
 	job                 application_core_vo.JobVO
 }
 
-func NewApplicationEntity(applDTO application_core_dto.ApplicationBasicDTO) (ApplicationEntity, error) {
+func NewApplicationEntity(applDTO application_core_dto.ApplicationBasicDTO) (*ApplicationEntity, error) {
+	if len(applDTO.ApplicationLogs) == 0 {
+		return nil, fmt.Errorf("please provide application log movement record")
+	}
+
 	appl := ApplicationEntity{
 		applicantId:         applDTO.ApplicantId,
 		jobId:               applDTO.JobId,
-		currentStepSequence: 1,
+		currentStepSequence: applDTO.CurrentStepSequence,
 		job: application_core_vo.JobVO{
 			JobName:           applDTO.Job.JobName,
 			JobSAdmtatus:      applDTO.Job.JobSAdmtatus,
@@ -47,30 +46,34 @@ func NewApplicationEntity(applDTO application_core_dto.ApplicationBasicDTO) (App
 		},
 	}
 
-	appl.Base(core_shared.BaseDTO{
-		Id:        applDTO.BaseRecord.Id,
-		CreatedAt: time.Now(),
-		CreatedBy: applDTO.BaseRecord.CreatedBy,
-	})
+	appl.Base(applDTO.BaseRecord)
 
-	appl.createApplicationLog()
+	for _, appLogDTO := range applDTO.ApplicationLogs {
+		appl.applicationLogs = append(appl.applicationLogs, NewApplicationLogEntity(appLogDTO))
+	}
 
-	return appl, nil
+	return &appl, nil
 }
 
 // Business requirements / logics
 
-func (appl *ApplicationEntity) MoveToNextStep(nextStepSequence int, stepStatus string) error {
+func (appl *ApplicationEntity) MoveToNextStep(nextStepSequence int, hiringStepType string, updatedBy string) error {
 	for _, v := range appl.applicationLogs {
 		if v.stepSequence == nextStepSequence {
 			return fmt.Errorf("duplicated step sequence")
 		}
 	}
 
+	if appl.isRejected || appl.isCancelled || appl.isWithdrawed || appl.isOffered || appl.isHired {
+		return fmt.Errorf("application criteria does meet the requirements to be moved to next step")
+	}
+
 	appl.currentStepSequence = nextStepSequence
+	appl.SetUpdatedAt(time.Now())
+	appl.SetUpdatedBy(updatedBy)
 	appl.PersistenceStatus = core_shared.MODIFIED
 
-	appl.createApplicationLog()
+	appl.createApplicationLog(hiringStepType)
 	return nil
 }
 
@@ -81,13 +84,11 @@ func (appl *ApplicationEntity) UpdateStepStatus(targettedStepSequence int, newSt
 			found = true
 			var appLog *ApplicationLogEntity = &appl.applicationLogs[i]
 
-			if newStepStatus == APPL_STEP_STATUS_REJECTED || newStepStatus == APPL_STEP_STATUS_WITHDRAW || newStepStatus == APPL_STEP_STATUS_CANCELLED || newStepStatus == APPL_STEP_STATUS_HIRED {
-				appLog.completedDate = time.Now()
-			}
 			appLog.stepStatus = newStepStatus
 			appLog.BaseEntity.SetUpdatedAt(time.Now())
 			appLog.BaseEntity.SetUpdatedBy(updatedBy)
 			appLog.PersistenceStatus = core_shared.MODIFIED
+
 			break
 		}
 	}
@@ -96,35 +97,48 @@ func (appl *ApplicationEntity) UpdateStepStatus(targettedStepSequence int, newSt
 		return fmt.Errorf("step sequence not found")
 	}
 
+	appl.updateApplicationDecisionFlagging(newStepStatus)
+
 	return nil
 }
 
-func (appl *ApplicationEntity) createApplicationLog() {
+func (appl *ApplicationEntity) updateApplicationDecisionFlagging(newStepStatus string) {
+	switch newStepStatus {
+	case constants.APPL_STEP_STATUS_REJECTED:
+		appl.isRejected = true
+	case constants.APPL_STEP_STATUS_CANCELLED:
+		appl.isCancelled = true
+	case constants.APPL_STEP_STATUS_WITHDRAW:
+		appl.isWithdrawed = true
+	case constants.APPL_STEP_STATUS_OFFERED:
+		appl.isOffered = true
+	case constants.APPL_STEP_STATUS_HIRED:
+		appl.isHired = true
+
+	}
+}
+
+func (appl *ApplicationEntity) createApplicationLog(hiringStepType string) {
 	applLog := NewApplicationLogEntity(application_core_dto.ApplicationLogBasicDTO{
 		BaseRecord: core_shared.BaseDTO{
 			Id:        "ApplicationLogId123",
 			CreatedAt: time.Now(),
 			CreatedBy: appl.CreatedBy(),
 		},
-		ApplicationId: appl.Id(),
-		JobId:         appl.jobId,
-		StepSequence:  appl.currentStepSequence,
-		StepStatus:    APPL_STEP_STATUS_IN_PROGRESS,
+		ApplicationId:  appl.Id(),
+		JobId:          appl.jobId,
+		HiringStepType: hiringStepType,
+		StepSequence:   appl.currentStepSequence,
+		StepStatus:     constants.APPL_STEP_STATUS_IN_PROGRESS,
 	})
 	applLog.PersistenceStatus = core_shared.NEW
 
-	if len(appl.applicationLogs) > 1 {
-		prevStepSequence := appl.currentStepSequence - 1
-		for i := 0; i < len(appl.applicationLogs); i++ {
-			if appl.applicationLogs[i].stepSequence == prevStepSequence {
-				var applLog *ApplicationLogEntity = &appl.applicationLogs[i]
-				applLog.stepStatus = APPL_STEP_STATUS_PASSED
-				applLog.BaseEntity.SetUpdatedAt(time.Now())
-				applLog.BaseEntity.SetUpdatedBy(appl.CreatedBy())
-				applLog.PersistenceStatus = core_shared.MODIFIED
-				break
-			}
-		}
+	nextStepIs2ndStep := (appl.currentStepSequence - 1) == 1
+	if len(appl.applicationLogs) == 1 && nextStepIs2ndStep {
+		var applLog *ApplicationLogEntity = &appl.applicationLogs[0]
+		applLog.stepStatus = constants.APPL_STEP_STATUS_PASSED
+		applLog.PersistenceStatus = core_shared.MODIFIED
+
 	}
 
 	appl.applicationLogs = append(appl.applicationLogs, applLog)
