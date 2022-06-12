@@ -17,10 +17,10 @@ type ApplicationEntity struct {
 	jobId                     string
 	currentHiringStepSequence int
 	isRejected                bool
+	isCancelled               bool
+	isWithdrawed              bool
 	isOffered                 bool
 	isHired                   bool
-	isWithdrawed              bool
-	isCancelled               bool
 	applicant                 application_core_vo.ApplicantVO
 	job                       application_core_vo.JobVO
 }
@@ -34,6 +34,12 @@ func NewApplicationEntity(applDTO application_core_dto.ApplicationBasicDTO) (*Ap
 		applicantId:               applDTO.ApplicantId,
 		jobId:                     applDTO.JobId,
 		currentHiringStepSequence: applDTO.CurrentHiringStepSequence,
+		isRejected:                applDTO.IsRejected,
+		isCancelled:               applDTO.IsCancelled,
+		isWithdrawed:              applDTO.IsWithdrawed,
+		isOffered:                 applDTO.IsOffered,
+		isHired:                   applDTO.IsHired,
+		applicant:                 applDTO.Applicant,
 		job: application_core_vo.JobVO{
 			JobName:           applDTO.Job.JobName,
 			JobSAdmtatus:      applDTO.Job.JobSAdmtatus,
@@ -77,7 +83,7 @@ func (appl *ApplicationEntity) MoveToNextStep(nextHiringStepSequence int, hiring
 	return nil
 }
 
-func (appl *ApplicationEntity) UpdateStepStatus(targettedHiringStepSequence int, newHiringStepStatus string, updatedBy string) error {
+func (appl *ApplicationEntity) UpdateHiringStepStatus(targettedHiringStepSequence int, newHiringStepStatus string, updatedBy string) error {
 	found := false
 	for i := 0; i < len(appl.applicationLogs); i++ {
 		if appl.applicationLogs[i].hiringStepSequence == targettedHiringStepSequence {
@@ -138,7 +144,6 @@ func (appl *ApplicationEntity) createApplicationLog(hiringStepType string) {
 		var applLog *ApplicationLogEntity = &appl.applicationLogs[0]
 		applLog.hiringStepStatus = constants.APPL_STEP_STATUS_PASSED
 		applLog.PersistenceStatus = core_shared.MODIFIED
-
 	}
 
 	appl.applicationLogs = append(appl.applicationLogs, applLog)

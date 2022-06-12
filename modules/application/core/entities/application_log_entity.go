@@ -27,11 +27,7 @@ func NewApplicationLogEntity(applLogDTO application_core_dto.ApplicationLogBasic
 		hiringStepStatus:          applLogDTO.HiringStepStatus,
 	}
 
-	applLog.Base(core_shared.BaseDTO{
-		Id:        applLogDTO.BaseRecord.Id,
-		CreatedAt: time.Now(),
-		CreatedBy: applLogDTO.BaseRecord.CreatedBy,
-	})
+	applLog.Base(applLogDTO.BaseRecord)
 
 	return applLog
 }
