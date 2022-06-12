@@ -16,7 +16,7 @@ type ApplicationLogEntity struct {
 	completedDate time.Time
 }
 
-func NewApplicationLogEntity(applLogDTO application_core_dto.ApplicationLogBasicDTO) (ApplicationLogEntity, error) {
+func NewApplicationLogEntity(applLogDTO application_core_dto.ApplicationLogBasicDTO) ApplicationLogEntity {
 	applLog := ApplicationLogEntity{
 		applicationId: applLogDTO.ApplicationId,
 		jobId:         applLogDTO.JobId,
@@ -31,7 +31,7 @@ func NewApplicationLogEntity(applLogDTO application_core_dto.ApplicationLogBasic
 		CreatedBy: applLogDTO.BaseRecord.CreatedBy,
 	})
 
-	return applLog, nil
+	return applLog
 }
 
 func (applLog *ApplicationLogEntity) ApplicationId() string {

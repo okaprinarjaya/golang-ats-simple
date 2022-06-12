@@ -73,3 +73,19 @@ func (baseEnt *BaseEntity) UpdatedBy() string {
 func (baseEnt *BaseEntity) DeletedBy() string {
 	return baseEnt.deletedBy
 }
+
+func (baseEnt *BaseEntity) SetUpdatedAt(updatedAt time.Time) {
+	baseEnt.updatedAt = updatedAt
+}
+
+func (baseEnt *BaseEntity) SetDeleteddAt(deletedAt time.Time) {
+	baseEnt.deletedAt = deletedAt
+}
+
+func (baseEnt *BaseEntity) SetUpdatedBy(updatedBy string) {
+	baseEnt.updatedBy = updatedBy
+}
+
+func (baseEnt *BaseEntity) SetDeletedBy(deletedBy string) {
+	baseEnt.deletedBy = deletedBy
+}

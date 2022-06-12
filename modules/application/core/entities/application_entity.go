@@ -1,11 +1,23 @@
 package application_core_entities
 
 import (
+	"fmt"
 	"time"
 
 	application_core_dto "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/application/core/dto"
 	application_core_vo "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/application/core/value-objects"
 	core_shared "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/core-shared"
+)
+
+const (
+	APPL_STEP_STATUS_IN_PROGRESS = "IN_PROGRESS"
+	APPL_STEP_STATUS_IN_REVIEW   = "IN_REVIEW"
+	APPL_STEP_STATUS_PASSED      = "PASSED"
+	APPL_STEP_STATUS_REJECTED    = "REJECTED"
+	APPL_STEP_STATUS_WITHDRAW    = "WITHDRAW"
+	APPL_STEP_STATUS_OFFERED     = "OFFERED"
+	APPL_STEP_STATUS_CANCELLED   = "CANCELLED"
+	APPL_STEP_STATUS_HIRED       = "HIRED"
 )
 
 type ApplicationEntity struct {
@@ -20,7 +32,6 @@ type ApplicationEntity struct {
 
 func NewApplicationEntity(applDTO application_core_dto.ApplicationBasicDTO) (ApplicationEntity, error) {
 	appl := ApplicationEntity{
-		applicationLogs:     nil,
 		applicantId:         applDTO.ApplicantId,
 		jobId:               applDTO.JobId,
 		currentStepSequence: 1,
@@ -42,37 +53,81 @@ func NewApplicationEntity(applDTO application_core_dto.ApplicationBasicDTO) (App
 		CreatedBy: applDTO.BaseRecord.CreatedBy,
 	})
 
+	appl.createApplicationLog()
+
 	return appl, nil
 }
 
-// Business logics
+// Business requirements / logics
 
 func (appl *ApplicationEntity) MoveToNextStep(nextStepSequence int, stepStatus string) error {
-	appl.currentStepSequence = nextStepSequence
-	if err := appl.createApplicationLog(stepStatus); err != nil {
-		return err
+	for _, v := range appl.applicationLogs {
+		if v.stepSequence == nextStepSequence {
+			return fmt.Errorf("duplicated step sequence")
+		}
 	}
+
+	appl.currentStepSequence = nextStepSequence
+	appl.PersistenceStatus = core_shared.MODIFIED
+
+	appl.createApplicationLog()
 	return nil
 }
 
-func (appl *ApplicationEntity) createApplicationLog(stepStatus string) error {
-	applLog, err := NewApplicationLogEntity(application_core_dto.ApplicationLogBasicDTO{
+func (appl *ApplicationEntity) UpdateStepStatus(targettedStepSequence int, newStepStatus string, updatedBy string) error {
+	found := false
+	for i := 0; i < len(appl.applicationLogs); i++ {
+		if appl.applicationLogs[i].stepSequence == targettedStepSequence {
+			found = true
+			var appLog *ApplicationLogEntity = &appl.applicationLogs[i]
+
+			if newStepStatus == APPL_STEP_STATUS_REJECTED || newStepStatus == APPL_STEP_STATUS_WITHDRAW || newStepStatus == APPL_STEP_STATUS_CANCELLED || newStepStatus == APPL_STEP_STATUS_HIRED {
+				appLog.completedDate = time.Now()
+			}
+			appLog.stepStatus = newStepStatus
+			appLog.BaseEntity.SetUpdatedAt(time.Now())
+			appLog.BaseEntity.SetUpdatedBy(updatedBy)
+			appLog.PersistenceStatus = core_shared.MODIFIED
+			break
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("step sequence not found")
+	}
+
+	return nil
+}
+
+func (appl *ApplicationEntity) createApplicationLog() {
+	applLog := NewApplicationLogEntity(application_core_dto.ApplicationLogBasicDTO{
 		BaseRecord: core_shared.BaseDTO{
 			Id:        "ApplicationLogId123",
 			CreatedAt: time.Now(),
+			CreatedBy: appl.CreatedBy(),
 		},
 		ApplicationId: appl.Id(),
-		JobId:         appl.JobId(),
-		StepSequence:  appl.CurrentStepSequence(),
-		StepStatus:    stepStatus,
+		JobId:         appl.jobId,
+		StepSequence:  appl.currentStepSequence,
+		StepStatus:    APPL_STEP_STATUS_IN_PROGRESS,
 	})
+	applLog.PersistenceStatus = core_shared.NEW
 
-	if err != nil {
-		return err
+	if len(appl.applicationLogs) > 1 {
+		prevStepSequence := appl.currentStepSequence - 1
+		for i := 0; i < len(appl.applicationLogs); i++ {
+			if appl.applicationLogs[i].stepSequence == prevStepSequence {
+				var applLog *ApplicationLogEntity = &appl.applicationLogs[i]
+				applLog.stepStatus = APPL_STEP_STATUS_PASSED
+				applLog.BaseEntity.SetUpdatedAt(time.Now())
+				applLog.BaseEntity.SetUpdatedBy(appl.CreatedBy())
+				applLog.PersistenceStatus = core_shared.MODIFIED
+				break
+			}
+		}
 	}
 
 	appl.applicationLogs = append(appl.applicationLogs, applLog)
-	return nil
 }
 
 // Data Getters

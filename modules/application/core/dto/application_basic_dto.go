@@ -7,6 +7,7 @@ import (
 
 type ApplicationBasicDTO struct {
 	BaseRecord          core_shared.BaseDTO             `json:"baseRecord"`
+	ApplicationLogs     []ApplicationLogBasicDTO        `json:"applicationLogs"`
 	ApplicantId         string                          `json:"applicantId"`
 	JobId               string                          `json:"jobId"`
 	CurrentStepSequence int                             `json:"currentStepSequence"`
