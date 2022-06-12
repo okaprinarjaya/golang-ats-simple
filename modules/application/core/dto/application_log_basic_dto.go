@@ -12,6 +12,6 @@ type ApplicationLogBasicDTO struct {
 	JobId                     string              `json:"jobId"`
 	HiringStepType            string              `json:"hiringStepType"`
 	HiringSteptypeCompletedAt time.Time           `json:"hiringStepTypeCompletedAt"`
-	StepSequence              int                 `json:"stepSequence"`
-	StepStatus                string              `json:"stepStatus"`
+	HiringStepSequence        int                 `json:"hiringStepSequence"`
+	HiringStepStatus          string              `json:"hiringStepStatus"`
 }

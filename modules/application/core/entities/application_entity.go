@@ -12,17 +12,17 @@ import (
 
 type ApplicationEntity struct {
 	core_shared.BaseEntity
-	applicationLogs     []ApplicationLogEntity
-	applicantId         string
-	jobId               string
-	currentStepSequence int
-	isRejected          bool
-	isOffered           bool
-	isHired             bool
-	isWithdrawed        bool
-	isCancelled         bool
-	applicant           application_core_vo.ApplicantVO
-	job                 application_core_vo.JobVO
+	applicationLogs           []ApplicationLogEntity
+	applicantId               string
+	jobId                     string
+	currentHiringStepSequence int
+	isRejected                bool
+	isOffered                 bool
+	isHired                   bool
+	isWithdrawed              bool
+	isCancelled               bool
+	applicant                 application_core_vo.ApplicantVO
+	job                       application_core_vo.JobVO
 }
 
 func NewApplicationEntity(applDTO application_core_dto.ApplicationBasicDTO) (*ApplicationEntity, error) {
@@ -31,9 +31,9 @@ func NewApplicationEntity(applDTO application_core_dto.ApplicationBasicDTO) (*Ap
 	}
 
 	appl := ApplicationEntity{
-		applicantId:         applDTO.ApplicantId,
-		jobId:               applDTO.JobId,
-		currentStepSequence: applDTO.CurrentStepSequence,
+		applicantId:               applDTO.ApplicantId,
+		jobId:                     applDTO.JobId,
+		currentHiringStepSequence: applDTO.CurrentHiringStepSequence,
 		job: application_core_vo.JobVO{
 			JobName:           applDTO.Job.JobName,
 			JobSAdmtatus:      applDTO.Job.JobSAdmtatus,
@@ -57,9 +57,9 @@ func NewApplicationEntity(applDTO application_core_dto.ApplicationBasicDTO) (*Ap
 
 // Business requirements / logics
 
-func (appl *ApplicationEntity) MoveToNextStep(nextStepSequence int, hiringStepType string, updatedBy string) error {
+func (appl *ApplicationEntity) MoveToNextStep(nextHiringStepSequence int, hiringStepType string, updatedBy string) error {
 	for _, v := range appl.applicationLogs {
-		if v.stepSequence == nextStepSequence {
+		if v.hiringStepSequence == nextHiringStepSequence {
 			return fmt.Errorf("duplicated step sequence")
 		}
 	}
@@ -68,7 +68,7 @@ func (appl *ApplicationEntity) MoveToNextStep(nextStepSequence int, hiringStepTy
 		return fmt.Errorf("application criteria does meet the requirements to be moved to next step")
 	}
 
-	appl.currentStepSequence = nextStepSequence
+	appl.currentHiringStepSequence = nextHiringStepSequence
 	appl.SetUpdatedAt(time.Now())
 	appl.SetUpdatedBy(updatedBy)
 	appl.PersistenceStatus = core_shared.MODIFIED
@@ -77,14 +77,14 @@ func (appl *ApplicationEntity) MoveToNextStep(nextStepSequence int, hiringStepTy
 	return nil
 }
 
-func (appl *ApplicationEntity) UpdateStepStatus(targettedStepSequence int, newStepStatus string, updatedBy string) error {
+func (appl *ApplicationEntity) UpdateStepStatus(targettedHiringStepSequence int, newHiringStepStatus string, updatedBy string) error {
 	found := false
 	for i := 0; i < len(appl.applicationLogs); i++ {
-		if appl.applicationLogs[i].stepSequence == targettedStepSequence {
+		if appl.applicationLogs[i].hiringStepSequence == targettedHiringStepSequence {
 			found = true
 			var appLog *ApplicationLogEntity = &appl.applicationLogs[i]
 
-			appLog.stepStatus = newStepStatus
+			appLog.hiringStepStatus = newHiringStepStatus
 			appLog.BaseEntity.SetUpdatedAt(time.Now())
 			appLog.BaseEntity.SetUpdatedBy(updatedBy)
 			appLog.PersistenceStatus = core_shared.MODIFIED
@@ -97,7 +97,7 @@ func (appl *ApplicationEntity) UpdateStepStatus(targettedStepSequence int, newSt
 		return fmt.Errorf("step sequence not found")
 	}
 
-	appl.updateApplicationDecisionFlagging(newStepStatus)
+	appl.updateApplicationDecisionFlagging(newHiringStepStatus)
 
 	return nil
 }
@@ -125,18 +125,18 @@ func (appl *ApplicationEntity) createApplicationLog(hiringStepType string) {
 			CreatedAt: time.Now(),
 			CreatedBy: appl.CreatedBy(),
 		},
-		ApplicationId:  appl.Id(),
-		JobId:          appl.jobId,
-		HiringStepType: hiringStepType,
-		StepSequence:   appl.currentStepSequence,
-		StepStatus:     constants.APPL_STEP_STATUS_IN_PROGRESS,
+		ApplicationId:      appl.Id(),
+		JobId:              appl.jobId,
+		HiringStepType:     hiringStepType,
+		HiringStepSequence: appl.currentHiringStepSequence,
+		HiringStepStatus:   constants.APPL_STEP_STATUS_IN_PROGRESS,
 	})
 	applLog.PersistenceStatus = core_shared.NEW
 
-	nextStepIs2ndStep := (appl.currentStepSequence - 1) == 1
+	nextStepIs2ndStep := (appl.currentHiringStepSequence - 1) == 1
 	if len(appl.applicationLogs) == 1 && nextStepIs2ndStep {
 		var applLog *ApplicationLogEntity = &appl.applicationLogs[0]
-		applLog.stepStatus = constants.APPL_STEP_STATUS_PASSED
+		applLog.hiringStepStatus = constants.APPL_STEP_STATUS_PASSED
 		applLog.PersistenceStatus = core_shared.MODIFIED
 
 	}
@@ -158,8 +158,8 @@ func (appl *ApplicationEntity) JobId() string {
 	return appl.jobId
 }
 
-func (appl *ApplicationEntity) CurrentStepSequence() int {
-	return appl.currentStepSequence
+func (appl *ApplicationEntity) CurrentHiringStepSequence() int {
+	return appl.currentHiringStepSequence
 }
 
 func (appl *ApplicationEntity) Applicant() application_core_vo.ApplicantVO {

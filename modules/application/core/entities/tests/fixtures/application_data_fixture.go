@@ -22,9 +22,9 @@ func CreateApplicationData() application_core_dto.ApplicationBasicDTO {
 			CreatedAt: applicationCreatedAt,
 			CreatedBy: applicationCreatedBy,
 		},
-		ApplicantId:         applicantId,
-		JobId:               jobId,
-		CurrentStepSequence: 1,
+		ApplicantId:               applicantId,
+		JobId:                     jobId,
+		CurrentHiringStepSequence: 1,
 		Applicant: application_core_valueobjects.ApplicantVO{
 			ApplicantCompleteName:   "Budi",
 			ApplicantGender:         "MALE",
@@ -57,18 +57,18 @@ func CreateApplicationData_InitialCvSubmissionInProgress() application_core_dto.
 	applicationLogCreatedBy := "Recruiter"
 
 	applData := CreateApplicationData()
-	applData.CurrentStepSequence = 1
+	applData.CurrentHiringStepSequence = 1
 	applData.ApplicationLogs = append(applData.ApplicationLogs, application_core_dto.ApplicationLogBasicDTO{
 		BaseRecord: core_shared.BaseDTO{
 			Id:        "appl-log-001",
 			CreatedAt: time.Date(2022, time.May, 1, 10, 0, 0, 0, time.UTC),
 			CreatedBy: applicationLogCreatedBy,
 		},
-		ApplicationId:  applicationId,
-		JobId:          jobId,
-		HiringStepType: constants.HIRING_STEP_TYPE_CV_SUBMISSION,
-		StepSequence:   1,
-		StepStatus:     constants.APPL_STEP_STATUS_IN_PROGRESS,
+		ApplicationId:      applicationId,
+		JobId:              jobId,
+		HiringStepType:     constants.HIRING_STEP_TYPE_CV_SUBMISSION,
+		HiringStepSequence: 1,
+		HiringStepStatus:   constants.APPL_STEP_STATUS_IN_PROGRESS,
 	})
 
 	return applData
@@ -80,7 +80,7 @@ func CreateApplicationData_WithTwoStepMovementLog() application_core_dto.Applica
 	applicationLogCreatedBy := "Recruiter"
 
 	applData := CreateApplicationData()
-	applData.CurrentStepSequence = 1
+	applData.CurrentHiringStepSequence = 1
 	applData.ApplicationLogs = []application_core_dto.ApplicationLogBasicDTO{
 		{
 			BaseRecord: core_shared.BaseDTO{
@@ -88,11 +88,11 @@ func CreateApplicationData_WithTwoStepMovementLog() application_core_dto.Applica
 				CreatedAt: time.Date(2022, time.May, 1, 10, 0, 0, 0, time.UTC),
 				CreatedBy: applicationLogCreatedBy,
 			},
-			ApplicationId:  applicationId,
-			JobId:          jobId,
-			HiringStepType: constants.HIRING_STEP_TYPE_CV_SUBMISSION,
-			StepSequence:   1,
-			StepStatus:     constants.APPL_STEP_STATUS_PASSED,
+			ApplicationId:      applicationId,
+			JobId:              jobId,
+			HiringStepType:     constants.HIRING_STEP_TYPE_CV_SUBMISSION,
+			HiringStepSequence: 1,
+			HiringStepStatus:   constants.APPL_STEP_STATUS_PASSED,
 		},
 		{
 			BaseRecord: core_shared.BaseDTO{
@@ -100,11 +100,11 @@ func CreateApplicationData_WithTwoStepMovementLog() application_core_dto.Applica
 				CreatedAt: time.Date(2022, time.May, 2, 10, 0, 0, 0, time.UTC),
 				CreatedBy: applicationLogCreatedBy,
 			},
-			ApplicationId:  applicationId,
-			JobId:          jobId,
-			HiringStepType: constants.HIRING_STEP_TYPE_INTERVIEW,
-			StepSequence:   2,
-			StepStatus:     constants.APPL_STEP_STATUS_IN_PROGRESS,
+			ApplicationId:      applicationId,
+			JobId:              jobId,
+			HiringStepType:     constants.HIRING_STEP_TYPE_INTERVIEW,
+			HiringStepSequence: 2,
+			HiringStepStatus:   constants.APPL_STEP_STATUS_IN_PROGRESS,
 		},
 	}
 

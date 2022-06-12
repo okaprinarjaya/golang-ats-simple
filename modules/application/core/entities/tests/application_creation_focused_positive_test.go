@@ -14,10 +14,10 @@ func TestCreateApplication_InitialCvSubmissionInProgress_PositiveCase(t *testing
 	appl, err := application_core_entities.NewApplicationEntity(applData)
 
 	assert.Nil(t, err)
-	assert.Equal(t, 1, appl.CurrentStepSequence())
+	assert.Equal(t, 1, appl.CurrentHiringStepSequence())
 	assert.Equal(t, 1, len(appl.ApplicationLogs()))
 
 	appLog := &appl.ApplicationLogs()[0]
 	assert.Equal(t, appl.Id(), appLog.ApplicationId())
-	assert.Equal(t, constants.APPL_STEP_STATUS_IN_PROGRESS, appLog.StepStatus())
+	assert.Equal(t, constants.APPL_STEP_STATUS_IN_PROGRESS, appLog.HiringStepStatus())
 }

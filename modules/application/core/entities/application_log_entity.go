@@ -13,8 +13,8 @@ type ApplicationLogEntity struct {
 	jobId                     string
 	hiringStepType            string
 	hiringSteptypeCompletedAt time.Time
-	stepSequence              int
-	stepStatus                string
+	hiringStepSequence        int
+	hiringStepStatus          string
 }
 
 func NewApplicationLogEntity(applLogDTO application_core_dto.ApplicationLogBasicDTO) ApplicationLogEntity {
@@ -23,8 +23,8 @@ func NewApplicationLogEntity(applLogDTO application_core_dto.ApplicationLogBasic
 		jobId:                     applLogDTO.JobId,
 		hiringStepType:            applLogDTO.HiringStepType,
 		hiringSteptypeCompletedAt: applLogDTO.HiringSteptypeCompletedAt,
-		stepSequence:              applLogDTO.StepSequence,
-		stepStatus:                applLogDTO.StepStatus,
+		hiringStepSequence:        applLogDTO.HiringStepSequence,
+		hiringStepStatus:          applLogDTO.HiringStepStatus,
 	}
 
 	applLog.Base(core_shared.BaseDTO{
@@ -52,12 +52,12 @@ func (applLog *ApplicationLogEntity) HiringSteptypeCompletedAt() time.Time {
 	return applLog.hiringSteptypeCompletedAt
 }
 
-func (applLog *ApplicationLogEntity) StepSequence() int {
-	return applLog.stepSequence
+func (applLog *ApplicationLogEntity) HiringStepSequence() int {
+	return applLog.hiringStepSequence
 }
 
-func (applLog *ApplicationLogEntity) StepStatus() string {
-	return applLog.stepStatus
+func (applLog *ApplicationLogEntity) HiringStepStatus() string {
+	return applLog.hiringStepStatus
 }
 
 func (applLog *ApplicationLogEntity) Id() string {
