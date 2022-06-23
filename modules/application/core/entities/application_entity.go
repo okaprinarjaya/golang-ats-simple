@@ -40,16 +40,7 @@ func NewApplicationEntity(applDTO application_core_dto.ApplicationBasicDTO) (*Ap
 		isOffered:                 applDTO.IsOffered,
 		isHired:                   applDTO.IsHired,
 		applicant:                 applDTO.Applicant,
-		job: application_core_vo.JobVO{
-			JobName:           applDTO.Job.JobName,
-			JobAdmStatus:      applDTO.Job.JobAdmStatus,
-			JobDepartmentId:   applDTO.Job.JobDepartmentId,
-			JobDepartmentName: applDTO.Job.JobDepartmentName,
-			JobCountryId:      applDTO.Job.JobCountryId,
-			JobCountryName:    applDTO.Job.JobCountryName,
-			JobCityId:         applDTO.Job.JobCityId,
-			JobCityName:       applDTO.Job.JobCityName,
-		},
+		job:                       applDTO.Job,
 	}
 
 	appl.Base(applDTO.BaseRecord)
@@ -63,7 +54,12 @@ func NewApplicationEntity(applDTO application_core_dto.ApplicationBasicDTO) (*Ap
 
 // Business requirements / logics
 
-func (appl *ApplicationEntity) MoveToNextStep(nextHiringStepSequence int, hiringStepType string, updatedBy string) error {
+func (appl *ApplicationEntity) MoveToNextStep(
+	applLogBaseRecord core_shared.BaseDTO,
+	nextHiringStepSequence int,
+	hiringStepType string,
+	updatedBy string,
+) error {
 	for _, v := range appl.applicationLogs {
 		if v.hiringStepSequence == nextHiringStepSequence {
 			return fmt.Errorf("duplicated step sequence")
@@ -79,7 +75,7 @@ func (appl *ApplicationEntity) MoveToNextStep(nextHiringStepSequence int, hiring
 	appl.SetUpdatedBy(updatedBy)
 	appl.PersistenceStatus = core_shared.MODIFIED
 
-	appl.createApplicationLog(hiringStepType)
+	appl.createApplicationLog(applLogBaseRecord, hiringStepType)
 	return nil
 }
 
@@ -124,18 +120,15 @@ func (appl *ApplicationEntity) updateApplicationDecisionFlagging(newStepStatus s
 	}
 }
 
-func (appl *ApplicationEntity) createApplicationLog(hiringStepType string) {
+func (appl *ApplicationEntity) createApplicationLog(baseRecord core_shared.BaseDTO, hiringStepType string) {
 	applLog := NewApplicationLogEntity(application_core_dto.ApplicationLogBasicDTO{
-		BaseRecord: core_shared.BaseDTO{
-			Id:        "ApplicationLogId123",
-			CreatedAt: time.Now(),
-			CreatedBy: appl.CreatedBy(),
-		},
+		BaseRecord:         baseRecord,
 		ApplicationId:      appl.Id(),
 		JobId:              appl.jobId,
 		HiringStepType:     hiringStepType,
 		HiringStepSequence: appl.currentHiringStepSequence,
 		HiringStepStatus:   constants.APPL_STEP_STATUS_IN_PROGRESS,
+		UserType:           "APPLICANT",
 	})
 	applLog.PersistenceStatus = core_shared.NEW
 

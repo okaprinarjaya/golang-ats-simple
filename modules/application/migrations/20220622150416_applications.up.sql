@@ -19,7 +19,7 @@ create table applications (
 	applicant_country_name varchar(64),
 	applicant_city_id varchar(64),
 	applicant_city_name varchar(64),
-	applicant_is_looking_oppty varchar(64),
+	applicant_is_looking_oppty BOOLEAN,
 	applicant_education_last varchar(128),
 	applicant_total_years_xp int,
 	applicant_job_level_last varchar(64),

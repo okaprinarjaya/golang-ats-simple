@@ -11,7 +11,6 @@ create table application_logs (
 	hiring_step_status_closed_by_name varchar(128),
 	user_type varchar(16),
     created_at timestamptz not null default (now()),
-    updated_at timestamptz,
 	created_by varchar(64),
 	created_by_name varchar(128)
 );

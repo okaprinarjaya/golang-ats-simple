@@ -1,9 +1,12 @@
 package application_repositories
 
 import (
+	"database/sql"
+
 	application_core_entities "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/application/core/entities"
 	application_repositories_datamodels "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/application/repositories/data-models"
 	core_shared "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/core-shared"
+	"gitlab.com/okaprinarjaya.wartek/ats-simple/utils"
 	"gorm.io/gorm"
 )
 
@@ -16,25 +19,35 @@ func NewApplicationRepositoryPostgreSql(db *gorm.DB) *ApplicationRepositoryPostg
 }
 
 func (repo *ApplicationRepositoryPostgreSql) Save(applicationEntity application_core_entities.ApplicationEntity) error {
-	application := transformBusinessEntityToDataModel(applicationEntity)
+	application, applicationLogList := transformBusinessEntityToDataModel(applicationEntity)
 
-	if applicationEntity.PersistenceStatus == core_shared.NEW {
-		res := repo.Db.Create(&application)
+	return repo.Db.Transaction(func(tx *gorm.DB) error {
+		if applicationEntity.PersistenceStatus == core_shared.NEW {
+			res := repo.Db.Create(&application)
 
-		if res.Error != nil {
-			return res.Error
+			if res.Error != nil {
+				return res.Error
+			}
 		}
-	}
 
-	if applicationEntity.PersistenceStatus == core_shared.MODIFIED {
-		res := repo.Db.Updates(&application)
+		if applicationEntity.PersistenceStatus == core_shared.MODIFIED {
+			res := repo.Db.Updates(&application)
 
-		if res.Error != nil {
-			return res.Error
+			if res.Error != nil {
+				return res.Error
+			}
 		}
-	}
 
-	return nil
+		if len(applicationLogList) > 0 {
+			res := repo.Db.Create(&applicationLogList[0])
+
+			if res.Error != nil {
+				return res.Error
+			}
+		}
+
+		return nil
+	})
 }
 
 func (repo *ApplicationRepositoryPostgreSql) Delete(applicationEntity application_core_entities.ApplicationEntity) error {
@@ -45,7 +58,10 @@ func (repo *ApplicationRepositoryPostgreSql) FindAllByJobId(jobId string) ([]app
 	return nil, nil
 }
 
-func transformBusinessEntityToDataModel(applicationEntity application_core_entities.ApplicationEntity) application_repositories_datamodels.Application {
+func transformBusinessEntityToDataModel(applicationEntity application_core_entities.ApplicationEntity) (
+	application_repositories_datamodels.Application,
+	[]application_repositories_datamodels.ApplicationLog,
+) {
 	application := application_repositories_datamodels.Application{
 		ID:                        applicationEntity.Id(),
 		ApplicantId:               applicationEntity.ApplicantId(),
@@ -96,5 +112,44 @@ func transformBusinessEntityToDataModel(applicationEntity application_core_entit
 		DeletedByName: applicationEntity.DeletedByName(),
 	}
 
-	return application
+	var applicationLogList []application_repositories_datamodels.ApplicationLog
+
+	for _, log := range applicationEntity.ApplicationLogs() {
+		if log.PersistenceStatus == core_shared.NEW {
+			applicationLog := application_repositories_datamodels.ApplicationLog{
+				ID:             log.Id(),
+				ApplicationId:  log.ApplicationId(),
+				JobId:          log.JobId(),
+				HiringStepType: log.HiringStepType(),
+				HiringStepTypeCompletedAt: sql.NullTime{
+					Time:  log.HiringStepTypeCompletedAt(),
+					Valid: utils.DateValid(log.HiringStepTypeCompletedAt()),
+				},
+				HiringStepSequence: log.HiringStepSequence(),
+				HiringStepStatus:   log.HiringStepStatus(),
+				HiringStepStatusClosedAt: sql.NullTime{
+					Time:  log.HiringStepStatusClosedAt(),
+					Valid: utils.DateValid(log.HiringStepStatusClosedAt()),
+				},
+				HiringStepStatusClosedBy: sql.NullString{
+					String: log.HiringStepStatusClosedBy(),
+					Valid:  utils.StringValid(log.HiringStepStatusClosedBy()),
+				},
+				HiringStepStatusClosedByName: sql.NullString{
+					String: log.HiringStepStatusClosedByName(),
+					Valid:  utils.StringValid(log.HiringStepStatusClosedByName()),
+				},
+				UserType: log.UserType(),
+				CreatedAt: sql.NullTime{
+					Time:  log.CreatedAt(),
+					Valid: utils.DateValid(log.CreatedAt()),
+				},
+				CreatedBy:     log.CreatedBy(),
+				CreatedByName: application.CreatedByName,
+			}
+			applicationLogList = append(applicationLogList, applicationLog)
+		}
+	}
+
+	return application, applicationLogList
 }

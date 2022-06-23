@@ -9,7 +9,9 @@ import (
 
 func PgConnection() *gorm.DB {
 	dburi := "postgres://okaprinarjaya:ok4prin4rj4y4@localhost:5432/ats_simple?sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dburi), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dburi), &gorm.Config{
+		SkipDefaultTransaction: true,
+	})
 
 	if err != nil {
 		log.Fatalln(err)
