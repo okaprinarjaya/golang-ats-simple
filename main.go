@@ -154,6 +154,8 @@ func main() {
 			},
 		})
 
+		applicationEntity.PersistenceStatus = core_shared.NEW
+
 		err := repo.Create(*applicationEntity)
 
 		if err != nil {

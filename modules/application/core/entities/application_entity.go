@@ -167,6 +167,26 @@ func (appl *ApplicationEntity) CurrentHiringStepSequence() int {
 	return appl.currentHiringStepSequence
 }
 
+func (appl *ApplicationEntity) IsRejected() bool {
+	return appl.isRejected
+}
+
+func (appl *ApplicationEntity) IsCancelled() bool {
+	return appl.isCancelled
+}
+
+func (appl *ApplicationEntity) IsWithdrawed() bool {
+	return appl.isWithdrawed
+}
+
+func (appl *ApplicationEntity) IsOffered() bool {
+	return appl.isOffered
+}
+
+func (appl *ApplicationEntity) IsHired() bool {
+	return appl.isHired
+}
+
 func (appl *ApplicationEntity) Applicant() application_core_vo.ApplicantVO {
 	return appl.applicant
 }
