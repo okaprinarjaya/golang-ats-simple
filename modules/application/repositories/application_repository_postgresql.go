@@ -5,6 +5,7 @@ import (
 
 	application_core_entities "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/application/core/entities"
 	application_repositories_datamodels "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/application/repositories/data-models"
+	"gitlab.com/okaprinarjaya.wartek/ats-simple/utils"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +19,7 @@ func NewApplicationRepositoryPostgreSql(db *gorm.DB) *ApplicationRepositoryPostg
 
 func (repo *ApplicationRepositoryPostgreSql) Create(applicationEntity application_core_entities.ApplicationEntity) error {
 	application := application_repositories_datamodels.Application{
-		ID:          "application-id-123abc" + time.Now().String(),
+		ID:          utils.GenerateKSUID(),
 		ApplicantId: applicationEntity.ApplicantId(),
 		JobId:       applicationEntity.JobId(),
 		CreatedAt:   time.Now(),

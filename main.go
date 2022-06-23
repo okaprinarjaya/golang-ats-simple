@@ -63,7 +63,7 @@ func main() {
 			},
 			Job: application_core_vo.JobVO{
 				JobName:           "Job Name 123",
-				JobSAdmtatus:      "FULL_TIME",
+				JobAdmStatus:      "FULL_TIME",
 				JobDepartmentId:   "DeptId123",
 				JobDepartmentName: "Department Name ABC",
 				JobCountryId:      "CountryId123",
@@ -95,7 +95,7 @@ func main() {
 						ApplicationId:             appLog.ApplicationId(),
 						JobId:                     appLog.JobId(),
 						HiringStepType:            appLog.HiringStepType(),
-						HiringSteptypeCompletedAt: appLog.HiringSteptypeCompletedAt(),
+						HiringStepTypeCompletedAt: appLog.HiringStepTypeCompletedAt(),
 						HiringStepSequence:        appLog.HiringStepSequence(),
 						HiringStepStatus:          appLog.HiringStepStatus(),
 					})
@@ -144,7 +144,7 @@ func main() {
 			},
 			Job: application_core_vo.JobVO{
 				JobName:           "Job Name 123",
-				JobSAdmtatus:      "FULL_TIME",
+				JobAdmStatus:      "FULL_TIME",
 				JobDepartmentId:   "DeptId123",
 				JobDepartmentName: "Department Name ABC",
 				JobCountryId:      "CountryId123",

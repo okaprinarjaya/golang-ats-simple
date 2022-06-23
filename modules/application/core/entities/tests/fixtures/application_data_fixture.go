@@ -40,7 +40,7 @@ func CreateApplicationData() application_core_dto.ApplicationBasicDTO {
 		},
 		Job: application_core_valueobjects.JobVO{
 			JobName:           "Civil Engineering",
-			JobSAdmtatus:      "FULL_TIME",
+			JobAdmStatus:      "FULL_TIME",
 			JobDepartmentId:   "DepartmentId123",
 			JobDepartmentName: "Department Name ABC",
 			JobCountryId:      "001",

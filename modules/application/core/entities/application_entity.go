@@ -42,7 +42,7 @@ func NewApplicationEntity(applDTO application_core_dto.ApplicationBasicDTO) (*Ap
 		applicant:                 applDTO.Applicant,
 		job: application_core_vo.JobVO{
 			JobName:           applDTO.Job.JobName,
-			JobSAdmtatus:      applDTO.Job.JobSAdmtatus,
+			JobAdmStatus:      applDTO.Job.JobAdmStatus,
 			JobDepartmentId:   applDTO.Job.JobDepartmentId,
 			JobDepartmentName: applDTO.Job.JobDepartmentName,
 			JobCountryId:      applDTO.Job.JobCountryId,

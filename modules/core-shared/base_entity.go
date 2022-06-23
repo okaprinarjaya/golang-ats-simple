@@ -15,8 +15,11 @@ type BaseEntity struct {
 	updatedAt         time.Time
 	deletedAt         time.Time
 	createdBy         string
+	createdByName     string
 	updatedBy         string
+	updatedByName     string
 	deletedBy         string
+	deletedByName     string
 	PersistenceStatus string
 }
 
@@ -38,11 +41,20 @@ func (baseEnt *BaseEntity) Base(baseData BaseDTO) {
 	if baseData.CreatedBy != "" {
 		baseEnt.createdBy = baseData.CreatedBy
 	}
+	if baseData.CreatedByName != "" {
+		baseEnt.createdByName = baseData.CreatedByName
+	}
 	if baseData.UpdatedBy != "" {
 		baseEnt.updatedBy = baseData.UpdatedBy
 	}
+	if baseData.UpdatedByName != "" {
+		baseEnt.updatedByName = baseData.UpdatedByName
+	}
 	if baseData.DeletedBy != "" {
 		baseEnt.deletedBy = baseData.DeletedBy
+	}
+	if baseData.DeletedByName != "" {
+		baseEnt.deletedByName = baseData.DeletedByName
 	}
 }
 
@@ -72,6 +84,18 @@ func (baseEnt *BaseEntity) UpdatedBy() string {
 
 func (baseEnt *BaseEntity) DeletedBy() string {
 	return baseEnt.deletedBy
+}
+
+func (baseEnt *BaseEntity) CreatedByName() string {
+	return baseEnt.createdByName
+}
+
+func (baseEnt *BaseEntity) UpdatedByName() string {
+	return baseEnt.updatedByName
+}
+
+func (baseEnt *BaseEntity) DeletedByName() string {
+	return baseEnt.deletedByName
 }
 
 func (baseEnt *BaseEntity) SetUpdatedAt(updatedAt time.Time) {
