@@ -1,12 +1,19 @@
 package application_repositories_tests_fixtures
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"path"
+	"runtime"
 	"time"
 
 	constants "gitlab.com/okaprinarjaya.wartek/ats-simple/modules"
 	application_core_dto "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/application/core/dto"
 	application_core_vo "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/application/core/value-objects"
+	application_repositories_datamodels "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/application/repositories/data-models"
 	core_shared "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/core-shared"
+	"gorm.io/gorm"
 )
 
 type ApplicationDataSample_DTO struct {
@@ -20,6 +27,37 @@ type ApplicationDataSample_DTO struct {
 	ApplicationLogCreatedAt     time.Time
 	ApplicationLogCreatedBy     string
 	ApplicationLogCreatedByName string
+}
+
+type JSONDocument struct {
+	List []application_repositories_datamodels.Application
+}
+
+func SeedApplicationsDataSample(Db *gorm.DB) {
+	_, filename, _, _ := runtime.Caller(0)
+	pathStr := path.Join(path.Dir(filename), "applications_seed_sample.json")
+	byteValue, _ := ioutil.ReadFile(pathStr)
+
+	var jsonDocument JSONDocument
+	err := json.Unmarshal(byteValue, &jsonDocument)
+
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		for _, appl := range jsonDocument.List {
+			Db.Create(&appl)
+			// fmt.Println(appl)
+			// fmt.Println(appl.ID)
+			// fmt.Println(appl.ApplicantId)
+			// fmt.Println(appl.JobId)
+			// fmt.Println(appl.ApplicantCompleteName)
+			// fmt.Println(appl.CreatedByName)
+			// fmt.Println(appl.JobName)
+			// fmt.Println(appl.ApplicantExpectedSalaryCurrency)
+
+			// fmt.Println(appl.ApplicationLogs[0].CreatedByName)
+		}
+	}
 }
 
 func ApplicationDataSample1_DTO(dataIdentifier ApplicationDataSample_DTO) application_core_dto.ApplicationBasicDTO {
