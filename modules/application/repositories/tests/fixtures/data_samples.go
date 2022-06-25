@@ -46,16 +46,6 @@ func SeedApplicationsDataSample(Db *gorm.DB) {
 	} else {
 		for _, appl := range jsonDocument.List {
 			Db.Create(&appl)
-			// fmt.Println(appl)
-			// fmt.Println(appl.ID)
-			// fmt.Println(appl.ApplicantId)
-			// fmt.Println(appl.JobId)
-			// fmt.Println(appl.ApplicantCompleteName)
-			// fmt.Println(appl.CreatedByName)
-			// fmt.Println(appl.JobName)
-			// fmt.Println(appl.ApplicantExpectedSalaryCurrency)
-
-			// fmt.Println(appl.ApplicationLogs[0].CreatedByName)
 		}
 	}
 }
