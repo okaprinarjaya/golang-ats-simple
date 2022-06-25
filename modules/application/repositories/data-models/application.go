@@ -44,13 +44,14 @@ type Application struct {
 	JobCityId         string `gorm:"column:job_city_id"`
 	JobCityName       string `gorm:"column:job_city_name"`
 
-	CreatedAt     time.Time      `gorm:"column:created_at"`
-	UpdatedAt     sql.NullTime   `gorm:"column:updated_at"`
-	DeletedAt     sql.NullTime   `gorm:"column:deleted_at"`
-	CreatedBy     string         `gorm:"column:created_by"`
-	CreatedByName string         `gorm:"column:created_by_name"`
-	UpdatedBy     sql.NullString `gorm:"column:updated_by"`
-	UpdatedByName sql.NullString `gorm:"column:updated_by_name"`
-	DeletedBy     sql.NullString `gorm:"column:deleted_by"`
-	DeletedByName sql.NullString `gorm:"column:deleted_by_name"`
+	CreatedAt       time.Time        `gorm:"column:created_at"`
+	UpdatedAt       sql.NullTime     `gorm:"column:updated_at"`
+	DeletedAt       sql.NullTime     `gorm:"column:deleted_at"`
+	CreatedBy       string           `gorm:"column:created_by"`
+	CreatedByName   string           `gorm:"column:created_by_name"`
+	UpdatedBy       sql.NullString   `gorm:"column:updated_by"`
+	UpdatedByName   sql.NullString   `gorm:"column:updated_by_name"`
+	DeletedBy       sql.NullString   `gorm:"column:deleted_by"`
+	DeletedByName   sql.NullString   `gorm:"column:deleted_by_name"`
+	ApplicationLogs []ApplicationLog `gorm:"foreignKey:ApplicationId"`
 }
