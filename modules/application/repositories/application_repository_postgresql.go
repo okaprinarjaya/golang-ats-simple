@@ -23,7 +23,7 @@ func (repo *ApplicationRepositoryPostgreSql) Save(applicationEntity application_
 
 	return repo.Db.Transaction(func(tx *gorm.DB) error {
 		if applicationEntity.PersistenceStatus == core_shared.NEW {
-			res := repo.Db.Create(&application)
+			res := tx.Create(&application)
 
 			if res.Error != nil {
 				return res.Error
@@ -31,7 +31,7 @@ func (repo *ApplicationRepositoryPostgreSql) Save(applicationEntity application_
 		}
 
 		if applicationEntity.PersistenceStatus == core_shared.MODIFIED {
-			res := repo.Db.Updates(&application)
+			res := tx.Updates(&application)
 
 			if res.Error != nil {
 				return res.Error
@@ -39,7 +39,7 @@ func (repo *ApplicationRepositoryPostgreSql) Save(applicationEntity application_
 		}
 
 		if len(applicationLogList) > 0 {
-			res := repo.Db.Create(&applicationLogList[0])
+			res := tx.Create(&applicationLogList[0])
 
 			if res.Error != nil {
 				return res.Error
@@ -101,21 +101,39 @@ func transformBusinessEntityToDataModel(applicationEntity application_core_entit
 		JobCityId:         applicationEntity.Job().JobCityId,
 		JobCityName:       applicationEntity.Job().JobCityName,
 
-		CreatedAt:     applicationEntity.CreatedAt(),
-		UpdatedAt:     applicationEntity.UpdatedAt(),
-		DeletedAt:     applicationEntity.DeletedAt(),
+		CreatedAt: applicationEntity.CreatedAt(),
+		UpdatedAt: sql.NullTime{
+			Time:  applicationEntity.UpdatedAt(),
+			Valid: utils.DateValid(applicationEntity.UpdatedAt()),
+		},
+		DeletedAt: sql.NullTime{
+			Time:  applicationEntity.DeletedAt(),
+			Valid: utils.DateValid(applicationEntity.DeletedAt()),
+		},
 		CreatedBy:     applicationEntity.CreatedBy(),
 		CreatedByName: applicationEntity.CreatedByName(),
-		UpdatedBy:     applicationEntity.UpdatedBy(),
-		UpdatedByName: applicationEntity.UpdatedByName(),
-		DeletedBy:     applicationEntity.DeletedBy(),
-		DeletedByName: applicationEntity.DeletedByName(),
+		UpdatedBy: sql.NullString{
+			String: applicationEntity.UpdatedBy(),
+			Valid:  utils.StringValid(applicationEntity.UpdatedBy()),
+		},
+		UpdatedByName: sql.NullString{
+			String: applicationEntity.UpdatedByName(),
+			Valid:  utils.StringValid(applicationEntity.UpdatedByName()),
+		},
+		DeletedBy: sql.NullString{
+			String: applicationEntity.DeletedBy(),
+			Valid:  utils.StringValid(applicationEntity.DeletedBy()),
+		},
+		DeletedByName: sql.NullString{
+			String: applicationEntity.DeletedByName(),
+			Valid:  utils.StringValid(applicationEntity.DeletedByName()),
+		},
 	}
 
 	var applicationLogList []application_repositories_datamodels.ApplicationLog
 
 	for _, log := range applicationEntity.ApplicationLogs() {
-		if log.PersistenceStatus == core_shared.NEW {
+		if log.PersistenceStatus == core_shared.NEW || log.PersistenceStatus == core_shared.MODIFIED {
 			applicationLog := application_repositories_datamodels.ApplicationLog{
 				ID:             log.Id(),
 				ApplicationId:  log.ApplicationId(),
@@ -139,13 +157,10 @@ func transformBusinessEntityToDataModel(applicationEntity application_core_entit
 					String: log.HiringStepStatusClosedByName(),
 					Valid:  utils.StringValid(log.HiringStepStatusClosedByName()),
 				},
-				UserType: log.UserType(),
-				CreatedAt: sql.NullTime{
-					Time:  log.CreatedAt(),
-					Valid: utils.DateValid(log.CreatedAt()),
-				},
+				UserType:      log.UserType(),
+				CreatedAt:     log.CreatedAt(),
 				CreatedBy:     log.CreatedBy(),
-				CreatedByName: application.CreatedByName,
+				CreatedByName: log.CreatedByName(),
 			}
 			applicationLogList = append(applicationLogList, applicationLog)
 		}

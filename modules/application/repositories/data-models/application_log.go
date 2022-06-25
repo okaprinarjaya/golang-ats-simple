@@ -2,6 +2,7 @@ package application_repositories_datamodels
 
 import (
 	"database/sql"
+	"time"
 )
 
 type ApplicationLog struct {
@@ -16,7 +17,7 @@ type ApplicationLog struct {
 	HiringStepStatusClosedBy     sql.NullString `gorm:"column:hiring_step_status_closed_by"`
 	HiringStepStatusClosedByName sql.NullString `gorm:"column:hiring_step_status_closed_by_name"`
 	UserType                     string         `gorm:"column:user_type"`
-	CreatedAt                    sql.NullTime   `gorm:"column:created_at"`
+	CreatedAt                    time.Time      `gorm:"column:created_at"`
 	CreatedBy                    string         `gorm:"column:created_by"`
 	CreatedByName                string         `gorm:"column:created_by_name"`
 }

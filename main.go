@@ -127,8 +127,8 @@ func main() {
 
 	r.Post("/applications", func(w http.ResponseWriter, req *http.Request) {
 		applicantId := "applicant-id-14323-abc"
-		ksuidAppl := "application-id-14323"
-		ksuidApplLog := "application-log-id-14323"
+		ksuidAppl := "application-id-14323_a"
+		ksuidApplLog := "application-log-id-14323__11111111111111111111111111111111111111111111111111111111111111111111111111111"
 		jobId := "job-id-12344"
 		createdAt := time.Date(2022, time.May, 1, 10, 0, 0, 0, time.UTC)
 
