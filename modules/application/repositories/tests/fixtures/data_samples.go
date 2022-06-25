@@ -9,47 +9,52 @@ import (
 	core_shared "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/core-shared"
 )
 
-func DataSample1() application_core_dto.ApplicationBasicDTO {
-	applicantId := "applicant-id-4"
-	ksuidAppl := "application-id-4"
-	ksuidApplLog := "application-log-id-4"
-	jobId := "job-id-4"
-	createdAt := time.Date(2022, time.May, 1, 10, 0, 0, 0, time.UTC)
+type ApplicationDataSample_DTO struct {
+	ApplicationID               string
+	ApplicationCreatedAt        time.Time
+	ApplicationCreatedBy        string
+	ApplicationCreatedByName    string
+	ApplicantID                 string
+	JobID                       string
+	ApplicationLogID            string
+	ApplicationLogCreatedAt     time.Time
+	ApplicationLogCreatedBy     string
+	ApplicationLogCreatedByName string
+}
 
+func ApplicationDataSample1_DTO(dataIdentifier ApplicationDataSample_DTO) application_core_dto.ApplicationBasicDTO {
 	applDTO := application_core_dto.ApplicationBasicDTO{
 		BaseRecord: core_shared.BaseDTO{
-			Id:            ksuidAppl,
-			CreatedAt:     createdAt,
-			CreatedBy:     "CreatedById123abc321cba",
-			CreatedByName: "Oka The Applicant",
+			Id:            dataIdentifier.ApplicationID,
+			CreatedAt:     dataIdentifier.ApplicationCreatedAt,
+			CreatedBy:     dataIdentifier.ApplicationCreatedBy,
+			CreatedByName: dataIdentifier.ApplicationCreatedByName,
 		},
 		ApplicationLogs: []application_core_dto.ApplicationLogBasicDTO{
 			{
 				BaseRecord: core_shared.BaseDTO{
-					Id:            ksuidApplLog,
-					CreatedAt:     createdAt,
-					CreatedBy:     "CreatedById123abc321cba",
-					CreatedByName: "Oka The Applicant",
+					Id:            dataIdentifier.ApplicationLogID,
+					CreatedAt:     dataIdentifier.ApplicationLogCreatedAt,
+					CreatedBy:     dataIdentifier.ApplicationLogCreatedBy,
+					CreatedByName: dataIdentifier.ApplicationLogCreatedByName,
 				},
-				ApplicationId:                ksuidAppl,
-				JobId:                        jobId,
-				HiringStepType:               constants.HIRING_STEP_TYPE_CV_SUBMISSION,
-				HiringStepStatusClosedBy:     "Closed By ID 123",
-				HiringStepStatusClosedByName: "Closed By Name - Tono",
-				HiringStepSequence:           1,
-				HiringStepStatus:             constants.APPL_STEP_STATUS_IN_PROGRESS,
-				UserType:                     "APPLICANT",
+				ApplicationId:      dataIdentifier.ApplicationID,
+				JobId:              dataIdentifier.JobID,
+				HiringStepType:     constants.HIRING_STEP_TYPE_CV_SUBMISSION,
+				HiringStepSequence: 1,
+				HiringStepStatus:   constants.APPL_STEP_STATUS_IN_PROGRESS,
+				UserType:           "APPLICANT",
 			},
 		},
-		ApplicantId:               applicantId,
-		JobId:                     jobId,
+		ApplicantId:               dataIdentifier.ApplicantID,
+		JobId:                     dataIdentifier.JobID,
 		CurrentHiringStepSequence: 1,
 		Applicant: application_core_vo.ApplicantVO{
-			ApplicantCompleteName:           "Applicant Complete Name",
+			ApplicantCompleteName:           "Tono Reverseriansyah",
 			ApplicantGender:                 "M",
 			ApplicantDateOfBirth:            time.Date(1987, time.March, 20, 0, 0, 0, 0, time.Local),
 			ApplicantAddress:                "Jln. Applicant Address No. 001, Applicant City, Applicant Province, Indonesia",
-			ApplicantProfilePhoto:           "https://photo.me/oka.png",
+			ApplicantProfilePhoto:           "https://photo.me/tono.png",
 			ApplicantProfileSummary:         "I Love my self and i love to feed fish at pool fish",
 			ApplicantNationality:            "WNI",
 			ApplicantCountryId:              "1",
