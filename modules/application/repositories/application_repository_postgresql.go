@@ -2,8 +2,11 @@ package application_repositories
 
 import (
 	"database/sql"
+	"fmt"
 
+	application_core_dto "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/application/core/dto"
 	application_core_entities "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/application/core/entities"
+	application_core_valueobjects "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/application/core/value-objects"
 	application_repositories_datamodels "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/application/repositories/data-models"
 	core_shared "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/core-shared"
 	"gitlab.com/okaprinarjaya.wartek/ats-simple/utils"
@@ -52,6 +55,25 @@ func (repo *ApplicationRepositoryPostgreSql) Save(applicationEntity application_
 
 func (repo *ApplicationRepositoryPostgreSql) Delete(applicationEntity application_core_entities.ApplicationEntity) error {
 	return nil
+}
+
+func (repo *ApplicationRepositoryPostgreSql) FindById(id string) (*application_core_entities.ApplicationEntity, error) {
+	var applDataModel application_repositories_datamodels.Application
+	result := repo.Db.Find(&applDataModel, "id = ?", id)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	if result.RowsAffected == 1 {
+		var applLogDataModelList []application_repositories_datamodels.ApplicationLog
+		repo.Db.Where("application_id = ?", id).Find(&applLogDataModelList)
+
+		appl := transformDataModelToBusinessEntity(applDataModel, applLogDataModelList)
+		return &appl, nil
+	}
+
+	return nil, fmt.Errorf("data not found")
 }
 
 func (repo *ApplicationRepositoryPostgreSql) FindAllByJobId(jobId string) ([]application_core_entities.ApplicationEntity, error) {
@@ -167,4 +189,90 @@ func transformBusinessEntityToDataModel(applicationEntity application_core_entit
 	}
 
 	return application, applicationLogList
+}
+
+func transformDataModelToBusinessEntity(
+	applDataModel application_repositories_datamodels.Application,
+	applLogDataModelList []application_repositories_datamodels.ApplicationLog,
+) application_core_entities.ApplicationEntity {
+	applDTO := application_core_dto.ApplicationBasicDTO{
+		BaseRecord: core_shared.BaseDTO{
+			Id:            applDataModel.ID,
+			CreatedAt:     applDataModel.CreatedAt,
+			UpdatedAt:     applDataModel.UpdatedAt.Time,
+			DeletedAt:     applDataModel.DeletedAt.Time,
+			CreatedBy:     applDataModel.CreatedBy,
+			CreatedByName: applDataModel.CreatedByName,
+			UpdatedBy:     applDataModel.UpdatedBy.String,
+			UpdatedByName: applDataModel.UpdatedByName.String,
+			DeletedBy:     applDataModel.DeletedBy.String,
+			DeletedByName: applDataModel.DeletedByName.String,
+		},
+		ApplicationLogs: func() []application_core_dto.ApplicationLogBasicDTO {
+			var applLogList []application_core_dto.ApplicationLogBasicDTO
+			for _, applLogDataModel := range applLogDataModelList {
+				applLogDTO := application_core_dto.ApplicationLogBasicDTO{
+					BaseRecord: core_shared.BaseDTO{
+						Id:            applLogDataModel.ID,
+						CreatedAt:     applDataModel.CreatedAt,
+						CreatedBy:     applDataModel.CreatedBy,
+						CreatedByName: applLogDataModel.CreatedByName,
+					},
+					ApplicationId:                applLogDataModel.ApplicationId,
+					JobId:                        applLogDataModel.JobId,
+					HiringStepType:               applLogDataModel.HiringStepType,
+					HiringStepTypeCompletedAt:    applLogDataModel.HiringStepTypeCompletedAt.Time,
+					HiringStepSequence:           applLogDataModel.HiringStepSequence,
+					HiringStepStatus:             applLogDataModel.HiringStepStatus,
+					HiringStepStatusClosedAt:     applLogDataModel.HiringStepStatusClosedAt.Time,
+					HiringStepStatusClosedBy:     applLogDataModel.HiringStepStatusClosedBy.String,
+					HiringStepStatusClosedByName: applLogDataModel.HiringStepStatusClosedByName.String,
+				}
+				applLogList = append(applLogList, applLogDTO)
+			}
+			return applLogList
+		}(),
+		ApplicantId:               applDataModel.ApplicantId,
+		JobId:                     applDataModel.JobId,
+		CurrentHiringStepSequence: applDataModel.CurrentHiringStepSequence,
+		IsRejected:                applDataModel.IsRejected,
+		IsCancelled:               applDataModel.IsCancelled,
+		IsWithdrawed:              applDataModel.IsWithdrawed,
+		IsOffered:                 applDataModel.IsOffered,
+		IsHired:                   applDataModel.IsHired,
+		Applicant: application_core_valueobjects.ApplicantVO{
+			ApplicantCompleteName:           applDataModel.ApplicantCompleteName,
+			ApplicantGender:                 applDataModel.ApplicantGender,
+			ApplicantDateOfBirth:            applDataModel.ApplicantDateOfBirth,
+			ApplicantAddress:                applDataModel.ApplicantAddress,
+			ApplicantProfilePhoto:           applDataModel.ApplicantProfilePhoto,
+			ApplicantProfileSummary:         applDataModel.ApplicantProfileSummary,
+			ApplicantNationality:            applDataModel.ApplicantNationality,
+			ApplicantCountryId:              applDataModel.ApplicantCountryId,
+			ApplicantCountryName:            applDataModel.ApplicantCountryName,
+			ApplicantCityId:                 applDataModel.ApplicantCityId,
+			ApplicantCityName:               applDataModel.ApplicantCityName,
+			ApplicantIsLookingOppty:         applDataModel.ApplicantIsLookingOppty,
+			ApplicantEducationLast:          applDataModel.ApplicantEducationLast,
+			ApplicantTotalYearsXp:           applDataModel.ApplicantTotalYearsXp,
+			ApplicantJobLevelLast:           applDataModel.ApplicantJobLevelLast,
+			ApplicantWillingWorkOverseas:    applDataModel.ApplicantWillingWorkOverseas,
+			ApplicantExpectedSalary:         applDataModel.ApplicantExpectedSalary,
+			ApplicantExpectedSalaryCurrency: applDataModel.ApplicantExpectedSalaryCurrency,
+		},
+		Job: application_core_valueobjects.JobVO{
+			JobName:           applDataModel.JobName,
+			JobAdmStatus:      applDataModel.JobAdmStatus,
+			JobDepartmentId:   applDataModel.JobDepartmentId,
+			JobDepartmentName: applDataModel.JobDepartmentName,
+			JobCountryId:      applDataModel.JobCountryId,
+			JobCountryName:    applDataModel.JobCountryName,
+			JobCityId:         applDataModel.JobCityId,
+			JobCityName:       applDataModel.JobCityName,
+		},
+	}
+
+	appl, _ := application_core_entities.NewApplicationEntity(applDTO)
+
+	return *appl
 }

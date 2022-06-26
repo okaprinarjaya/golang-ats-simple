@@ -96,5 +96,19 @@ func (s *ApplicationRepositoryPostgreSqlPositiveTestSuite) TestCreateNewApplicat
 
 func (s *ApplicationRepositoryPostgreSqlPositiveTestSuite) TestFindApplicationData() {
 	application_repositories_tests_fixtures.SeedApplicationsDataSample(s.Db)
+
+	var repo application_repositories.IApplicationRepository = application_repositories.NewApplicationRepositoryPostgreSql(s.Db)
+	appl, _ := repo.FindById("application-id-seed-001")
+
+	s.T().Log("ID: " + appl.Id())
+	s.T().Log("Applicant ID: " + appl.ApplicantId())
+	s.T().Log("Job ID: " + appl.JobId())
+	s.T().Log("Job Name: " + appl.Job().JobName)
+
+	for _, log := range appl.ApplicationLogs() {
+		s.T().Log("Application Log ID: " + log.Id())
+		s.T().Log("Application ID: " + log.ApplicationId())
+	}
+
 	s.Equal(true, true)
 }
