@@ -100,15 +100,12 @@ func (s *ApplicationRepositoryPostgreSqlPositiveTestSuite) TestFindApplicationDa
 	var repo application_repositories.IApplicationRepository = application_repositories.NewApplicationRepositoryPostgreSql(s.Db)
 	appl, _ := repo.FindById("application-id-seed-001")
 
-	s.T().Log("ID: " + appl.Id())
-	s.T().Log("Applicant ID: " + appl.ApplicantId())
-	s.T().Log("Job ID: " + appl.JobId())
-	s.T().Log("Job Name: " + appl.Job().JobName)
+	s.Equal("application-id-seed-001", appl.Id())
+	s.Equal("applicant-id-seed-001", appl.ApplicantId())
+	s.Equal("job-id-seed-001", appl.JobId())
+	s.Greater(len(appl.ApplicationLogs()), 0)
 
-	for _, log := range appl.ApplicationLogs() {
-		s.T().Log("Application Log ID: " + log.Id())
-		s.T().Log("Application ID: " + log.ApplicationId())
-	}
-
-	s.Equal(true, true)
+	applLog := appl.ApplicationLogs()[0]
+	s.Equal("application-log-id-seed-001", applLog.Id())
+	s.Equal("application-id-seed-001", applLog.ApplicationId())
 }
