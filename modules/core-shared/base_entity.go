@@ -110,6 +110,14 @@ func (baseEnt *BaseEntity) SetUpdatedBy(updatedBy string) {
 	baseEnt.updatedBy = updatedBy
 }
 
+func (baseEnt *BaseEntity) SetUpdatedByName(updatedByName string) {
+	baseEnt.updatedByName = updatedByName
+}
+
 func (baseEnt *BaseEntity) SetDeletedBy(deletedBy string) {
 	baseEnt.deletedBy = deletedBy
+}
+
+func (baseEnt *BaseEntity) SetDeletedByName(deletedByName string) {
+	baseEnt.deletedByName = deletedByName
 }

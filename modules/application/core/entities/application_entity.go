@@ -54,6 +54,54 @@ func NewApplicationEntity(applDTO application_core_dto.ApplicationBasicDTO) (*Ap
 
 // Business requirements / logics
 
+func (appl *ApplicationEntity) MoveFromCVSubmissionToNextStep(
+	applLogBaseDTO core_shared.BaseDTO,
+	nextHiringStepSequence int,
+	hiringStepType string,
+	updatedBy string,
+	updatedByName string,
+	userType string,
+) error {
+	if appl.isHiringStepLogged(nextHiringStepSequence, constants.APPL_STEP_STATUS_PASSED) {
+		return fmt.Errorf("hiring step movement collision (double movement)")
+	}
+
+	if appl.currentHiringStepSequence == 1 {
+		appl.currentHiringStepSequence = nextHiringStepSequence
+		appl.SetUpdatedAt(time.Now())
+		appl.SetUpdatedBy(updatedBy)
+		appl.SetUpdatedByName(updatedByName)
+		appl.PersistenceStatus = core_shared.MODIFIED
+
+		for i := 0; i < len(appl.applicationLogs); i++ {
+			applLog := &appl.applicationLogs[i]
+			if applLog.hiringStepSequence == 1 &&
+				applLog.hiringStepType == constants.HIRING_STEP_TYPE_CV_SUBMISSION &&
+				applLog.hiringStepStatus == constants.APPL_STEP_STATUS_IN_PROGRESS {
+				applLog.hiringStepTypeCompletedAt = time.Now()
+				applLog.hiringStepStatusClosedAt = time.Now()
+				applLog.hiringStepStatusClosedBy = updatedBy
+				applLog.hiringStepStatusClosedByName = updatedByName
+				applLog.PersistenceStatus = core_shared.MODIFIED
+
+				break
+			}
+		}
+
+		appl.createApplicationLog2(
+			applLogBaseDTO,
+			1,
+			constants.HIRING_STEP_TYPE_CV_SUBMISSION,
+			constants.APPL_STEP_STATUS_PASSED,
+			userType,
+		)
+
+		return nil
+	}
+
+	return fmt.Errorf("hiring step sequence is not CV Submission")
+}
+
 func (appl *ApplicationEntity) MoveToNextStep(
 	applLogBaseRecord core_shared.BaseDTO,
 	nextHiringStepSequence int,
@@ -140,6 +188,37 @@ func (appl *ApplicationEntity) createApplicationLog(baseRecord core_shared.BaseD
 	}
 
 	appl.applicationLogs = append(appl.applicationLogs, applLog)
+}
+
+func (appl *ApplicationEntity) createApplicationLog2(
+	baseRecordDTO core_shared.BaseDTO,
+	hiringStepSequence int,
+	hiringStepType string,
+	hiringStepStatus string,
+	userType string,
+) {
+	applLog := NewApplicationLogEntity(application_core_dto.ApplicationLogBasicDTO{
+		BaseRecord:         baseRecordDTO,
+		ApplicationId:      appl.Id(),
+		JobId:              appl.jobId,
+		HiringStepType:     hiringStepType,
+		HiringStepSequence: hiringStepSequence,
+		HiringStepStatus:   hiringStepStatus,
+		UserType:           userType,
+	})
+	applLog.PersistenceStatus = core_shared.NEW
+	appl.applicationLogs = append(appl.applicationLogs, applLog)
+}
+
+func (appl *ApplicationEntity) isHiringStepLogged(hiringStepSequence int, hiringStepStatus string) bool {
+	logged := false
+	for _, applLog := range appl.applicationLogs {
+		if applLog.hiringStepSequence == hiringStepSequence && applLog.hiringStepStatus == hiringStepStatus {
+			logged = true
+			break
+		}
+	}
+	return logged
 }
 
 // Data Getters
