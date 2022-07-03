@@ -107,12 +107,11 @@ func main() {
 						BaseRecord: core_shared.BaseDTO{
 							Id: appLog.Id(),
 						},
-						ApplicationId:             appLog.ApplicationId(),
-						JobId:                     appLog.JobId(),
-						HiringStepType:            appLog.HiringStepType(),
-						HiringStepTypeCompletedAt: appLog.HiringStepTypeCompletedAt(),
-						HiringStepSequence:        appLog.HiringStepSequence(),
-						HiringStepStatus:          appLog.HiringStepStatus(),
+						ApplicationId:      appLog.ApplicationId(),
+						JobId:              appLog.JobId(),
+						HiringStepType:     appLog.HiringStepType(),
+						HiringStepSequence: appLog.HiringStepSequence(),
+						HiringStepStatus:   appLog.HiringStepStatus(),
 					})
 				}
 				return applLogList

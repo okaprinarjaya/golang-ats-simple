@@ -157,14 +157,10 @@ func transformBusinessEntityToDataModel(applicationEntity application_core_entit
 	for _, log := range applicationEntity.ApplicationLogs() {
 		if log.PersistenceStatus == core_shared.NEW || log.PersistenceStatus == core_shared.MODIFIED {
 			applicationLog := application_repositories_datamodels.ApplicationLog{
-				ID:             log.Id(),
-				ApplicationId:  log.ApplicationId(),
-				JobId:          log.JobId(),
-				HiringStepType: log.HiringStepType(),
-				HiringStepTypeCompletedAt: sql.NullTime{
-					Time:  log.HiringStepTypeCompletedAt(),
-					Valid: utils.DateValid(log.HiringStepTypeCompletedAt()),
-				},
+				ID:                 log.Id(),
+				ApplicationId:      log.ApplicationId(),
+				JobId:              log.JobId(),
+				HiringStepType:     log.HiringStepType(),
 				HiringStepSequence: log.HiringStepSequence(),
 				HiringStepStatus:   log.HiringStepStatus(),
 				HiringStepStatusClosedAt: sql.NullTime{
@@ -221,7 +217,6 @@ func transformDataModelToBusinessEntity(
 					ApplicationId:                applLogDataModel.ApplicationId,
 					JobId:                        applLogDataModel.JobId,
 					HiringStepType:               applLogDataModel.HiringStepType,
-					HiringStepTypeCompletedAt:    applLogDataModel.HiringStepTypeCompletedAt.Time,
 					HiringStepSequence:           applLogDataModel.HiringStepSequence,
 					HiringStepStatus:             applLogDataModel.HiringStepStatus,
 					HiringStepStatusClosedAt:     applLogDataModel.HiringStepStatusClosedAt.Time,

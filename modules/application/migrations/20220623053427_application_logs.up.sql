@@ -3,7 +3,6 @@ create table application_logs (
     application_id varchar(64) not null,
 	job_id varchar(64) not null,
 	hiring_step_type varchar(64) not null,
-	hiring_step_type_completed_at timestamptz,
 	hiring_step_sequence int not null,
 	hiring_step_status varchar(32) not null,
 	hiring_step_status_closed_at timestamptz,

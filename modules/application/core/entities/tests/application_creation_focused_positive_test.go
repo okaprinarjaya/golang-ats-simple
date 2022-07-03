@@ -10,7 +10,7 @@ import (
 )
 
 func TestCreateApplication_InitialCvSubmissionInProgress_PositiveCase(t *testing.T) {
-	applData := application_core_entities_tests_fixtures.CreateApplicationData_InitialCvSubmissionInProgress()
+	applData := application_core_entities_tests_fixtures.CreateApplicationData_CVSubmission_InProgress()
 	appl, err := application_core_entities.NewApplicationEntity(applData)
 
 	assert.Nil(t, err)

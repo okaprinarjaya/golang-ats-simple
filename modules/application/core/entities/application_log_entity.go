@@ -12,7 +12,6 @@ type ApplicationLogEntity struct {
 	applicationId                string
 	jobId                        string
 	hiringStepType               string
-	hiringStepTypeCompletedAt    time.Time
 	hiringStepSequence           int
 	hiringStepStatus             string
 	hiringStepStatusClosedAt     time.Time
@@ -26,7 +25,6 @@ func NewApplicationLogEntity(applLogDTO application_core_dto.ApplicationLogBasic
 		applicationId:                applLogDTO.ApplicationId,
 		jobId:                        applLogDTO.JobId,
 		hiringStepType:               applLogDTO.HiringStepType,
-		hiringStepTypeCompletedAt:    applLogDTO.HiringStepTypeCompletedAt,
 		hiringStepSequence:           applLogDTO.HiringStepSequence,
 		hiringStepStatus:             applLogDTO.HiringStepStatus,
 		hiringStepStatusClosedAt:     applLogDTO.HiringStepStatusClosedAt,
@@ -43,7 +41,6 @@ func NewApplicationLogEntity(applLogDTO application_core_dto.ApplicationLogBasic
 // Business requirements / logics
 
 func (applLog *ApplicationLogEntity) CloseCurrentStatusOfHiringStepType(userBy string, userByName string) {
-	applLog.hiringStepTypeCompletedAt = time.Now()
 	applLog.hiringStepStatusClosedAt = time.Now()
 	applLog.hiringStepStatusClosedBy = userBy
 	applLog.hiringStepStatusClosedByName = userByName
@@ -62,10 +59,6 @@ func (applLog *ApplicationLogEntity) JobId() string {
 
 func (applLog *ApplicationLogEntity) HiringStepType() string {
 	return applLog.hiringStepType
-}
-
-func (applLog *ApplicationLogEntity) HiringStepTypeCompletedAt() time.Time {
-	return applLog.hiringStepTypeCompletedAt
 }
 
 func (applLog *ApplicationLogEntity) HiringStepSequence() int {

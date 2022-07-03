@@ -10,7 +10,6 @@ type ApplicationLog struct {
 	ApplicationId                string         `gorm:"column:application_id"`
 	JobId                        string         `gorm:"column:job_id"`
 	HiringStepType               string         `gorm:"column:hiring_step_type"`
-	HiringStepTypeCompletedAt    sql.NullTime   `gorm:"column:hiring_step_type_completed_at"`
 	HiringStepSequence           int            `gorm:"column:hiring_step_sequence"`
 	HiringStepStatus             string         `gorm:"column:hiring_step_status"`
 	HiringStepStatusClosedAt     sql.NullTime   `gorm:"column:hiring_step_status_closed_at"`
