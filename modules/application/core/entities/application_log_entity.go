@@ -40,6 +40,18 @@ func NewApplicationLogEntity(applLogDTO application_core_dto.ApplicationLogBasic
 	return applLog
 }
 
+// Business requirements / logics
+
+func (applLog *ApplicationLogEntity) CloseCurrentStatusOfHiringStepType(userBy string, userByName string) {
+	applLog.hiringStepTypeCompletedAt = time.Now()
+	applLog.hiringStepStatusClosedAt = time.Now()
+	applLog.hiringStepStatusClosedBy = userBy
+	applLog.hiringStepStatusClosedByName = userByName
+	applLog.PersistenceStatus = core_shared.MODIFIED
+}
+
+// Data Getters
+
 func (applLog *ApplicationLogEntity) ApplicationId() string {
 	return applLog.applicationId
 }

@@ -57,20 +57,23 @@ func NewApplicationEntity(applDTO application_core_dto.ApplicationBasicDTO) (*Ap
 func (appl *ApplicationEntity) MoveFromCVSubmissionToNextStep(
 	applLogBaseDTO core_shared.BaseDTO,
 	nextHiringStepSequence int,
-	hiringStepType string,
-	updatedBy string,
-	updatedByName string,
+	nextHiringStepType string,
+	userBy string,
+	userByName string,
 	userType string,
 ) error {
-	if appl.isHiringStepLogged(nextHiringStepSequence, constants.APPL_STEP_STATUS_PASSED) {
+	currentStep := appl.isHiringStepLogged(1, constants.APPL_STEP_STATUS_PASSED)
+	nextStep := appl.isHiringStepLogged(nextHiringStepSequence, constants.APPL_STEP_STATUS_IN_PROGRESS)
+
+	if currentStep || nextStep {
 		return fmt.Errorf("hiring step movement collision (double movement)")
 	}
 
 	if appl.currentHiringStepSequence == 1 {
 		appl.currentHiringStepSequence = nextHiringStepSequence
 		appl.SetUpdatedAt(time.Now())
-		appl.SetUpdatedBy(updatedBy)
-		appl.SetUpdatedByName(updatedByName)
+		appl.SetUpdatedBy(userBy)
+		appl.SetUpdatedByName(userByName)
 		appl.PersistenceStatus = core_shared.MODIFIED
 
 		for i := 0; i < len(appl.applicationLogs); i++ {
@@ -78,12 +81,8 @@ func (appl *ApplicationEntity) MoveFromCVSubmissionToNextStep(
 			if applLog.hiringStepSequence == 1 &&
 				applLog.hiringStepType == constants.HIRING_STEP_TYPE_CV_SUBMISSION &&
 				applLog.hiringStepStatus == constants.APPL_STEP_STATUS_IN_PROGRESS {
-				applLog.hiringStepTypeCompletedAt = time.Now()
-				applLog.hiringStepStatusClosedAt = time.Now()
-				applLog.hiringStepStatusClosedBy = updatedBy
-				applLog.hiringStepStatusClosedByName = updatedByName
-				applLog.PersistenceStatus = core_shared.MODIFIED
 
+				applLog.CloseCurrentStatusOfHiringStepType(userBy, userByName)
 				break
 			}
 		}
@@ -93,6 +92,14 @@ func (appl *ApplicationEntity) MoveFromCVSubmissionToNextStep(
 			1,
 			constants.HIRING_STEP_TYPE_CV_SUBMISSION,
 			constants.APPL_STEP_STATUS_PASSED,
+			userType,
+		)
+
+		appl.createApplicationLog2(
+			applLogBaseDTO,
+			nextHiringStepSequence,
+			nextHiringStepType,
+			constants.APPL_STEP_STATUS_IN_PROGRESS,
 			userType,
 		)
 
