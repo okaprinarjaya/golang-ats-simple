@@ -17,10 +17,12 @@ func TestStepMovement_MoveFromCVSubmissionToNextStep(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 1, appl.CurrentHiringStepSequence())
 	assert.Equal(t, 1, len(appl.ApplicationLogs()))
+	assert.Equal(t, core_shared.NONE, appl.PersistenceStatus)
 
 	appLog := &appl.ApplicationLogs()[0]
-	assert.Equal(t, appl.Id(), appLog.ApplicationId())
+	assert.Equal(t, applData.BaseRecord.Id, appLog.ApplicationId())
 	assert.Equal(t, constants.APPL_STEP_STATUS_IN_PROGRESS, appLog.HiringStepStatus())
+	assert.Equal(t, core_shared.NONE, appLog.PersistenceStatus)
 
 	// Start move
 	err = appl.MoveFromCVSubmissionToNextStep(
