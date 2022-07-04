@@ -8,6 +8,7 @@ import (
 	application_core_dto "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/application/core/dto"
 	application_core_vo "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/application/core/value-objects"
 	core_shared "gitlab.com/okaprinarjaya.wartek/ats-simple/modules/core-shared"
+	"gitlab.com/okaprinarjaya.wartek/ats-simple/utils"
 )
 
 type ApplicationEntity struct {
@@ -55,7 +56,6 @@ func NewApplicationEntity(applDTO application_core_dto.ApplicationBasicDTO) (*Ap
 // Business requirements / logics
 
 func (appl *ApplicationEntity) MoveFromCVSubmissionToNextStep(
-	applLogBaseDTO core_shared.BaseDTO,
 	nextHiringStepSequence int,
 	nextHiringStepType string,
 	userBy string,
@@ -88,18 +88,20 @@ func (appl *ApplicationEntity) MoveFromCVSubmissionToNextStep(
 		}
 
 		appl.createApplicationLog2(
-			applLogBaseDTO,
 			1,
 			constants.HIRING_STEP_TYPE_CV_SUBMISSION,
 			constants.APPL_STEP_STATUS_PASSED,
+			userBy,
+			userByName,
 			userType,
 		)
 
 		appl.createApplicationLog2(
-			applLogBaseDTO,
 			nextHiringStepSequence,
 			nextHiringStepType,
 			constants.APPL_STEP_STATUS_IN_PROGRESS,
+			userBy,
+			userByName,
 			userType,
 		)
 
@@ -198,14 +200,20 @@ func (appl *ApplicationEntity) createApplicationLog(baseRecord core_shared.BaseD
 }
 
 func (appl *ApplicationEntity) createApplicationLog2(
-	baseRecordDTO core_shared.BaseDTO,
 	hiringStepSequence int,
 	hiringStepType string,
 	hiringStepStatus string,
+	userBy string,
+	userByName string,
 	userType string,
 ) {
 	applLog := NewApplicationLogEntity(application_core_dto.ApplicationLogBasicDTO{
-		BaseRecord:         baseRecordDTO,
+		BaseRecord: core_shared.BaseDTO{
+			Id:            utils.GenerateKSUID(),
+			CreatedAt:     time.Now(),
+			CreatedBy:     userBy,
+			CreatedByName: userByName,
+		},
 		ApplicationId:      appl.Id(),
 		JobId:              appl.jobId,
 		HiringStepType:     hiringStepType,

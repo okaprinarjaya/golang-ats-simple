@@ -140,7 +140,7 @@ func CreateApplicationData_Step2_Interview_InProgress() application_core_dto.App
 		{
 			BaseRecord: core_shared.BaseDTO{
 				Id:            "application-log-id-003",
-				CreatedAt:     time.Date(2022, time.May, 4, 6, 0, 0, 0, time.UTC),
+				CreatedAt:     time.Date(2022, time.May, 2, 6, 0, 0, 0, time.UTC),
 				CreatedBy:     "recruiter-id-001",
 				CreatedByName: "The Recruiter Name",
 			},
